@@ -1,436 +1,372 @@
 import { useMemo, useState } from 'react'
 import './App.css'
 
-const navItems = [
+const menuGroups = [
   {
-    id: 'inicio',
-    label: 'Inicio',
-    eyebrow: 'Acceso público',
-    title: 'Inicio ciudadano',
+    title: 'Módulo público',
+    items: [
+      { id: 'inicio', label: 'Inicio' },
+      { id: 'convocatorias', label: 'Convocatorias' },
+      { id: 'detalle-convocatoria', label: 'Detalle de convocatoria' },
+      { id: 'entidades', label: 'Entidades' },
+    ],
   },
   {
-    id: 'acceso',
-    label: 'Acceso',
-    eyebrow: 'Autenticación',
-    title: 'Ingreso y registro',
+    title: 'Mi cuenta',
+    items: [
+      { id: 'perfil', label: 'Mi perfil' },
+      { id: 'datos-personales', label: 'Datos personales' },
+      { id: 'experiencia', label: 'Experiencia' },
+      { id: 'estudios', label: 'Estudios' },
+    ],
   },
   {
-    id: 'panel',
-    label: 'Panel ciudadano',
-    eyebrow: 'Resumen personal',
-    title: 'Panel ciudadano',
+    title: 'Inscripción',
+    items: [
+      { id: 'inscripcion-datos', label: 'Paso 1: información' },
+      { id: 'inscripcion-documentos', label: 'Paso 3: documentos' },
+      { id: 'revision-envio', label: 'Paso 4: revisión' },
+      { id: 'confirmacion', label: 'Confirmación' },
+    ],
   },
   {
-    id: 'busqueda',
-    label: 'Búsqueda',
-    eyebrow: 'Convocatorias',
-    title: 'Búsqueda de empleos',
-  },
-  {
-    id: 'detalle',
-    label: 'Detalle',
-    eyebrow: 'Información clara',
-    title: 'Detalle de convocatoria',
-  },
-  {
-    id: 'inscripcion',
-    label: 'Inscripción',
-    eyebrow: 'Postulación guiada',
-    title: 'Inscripción a empleo',
-  },
-  {
-    id: 'mis-empleos',
-    label: 'Mis empleos',
-    eyebrow: 'Seguimiento',
-    title: 'Mis empleos guardados y postulados',
-  },
-  {
-    id: 'hoja-vida',
-    label: 'Hoja de vida',
-    eyebrow: 'Perfil laboral',
-    title: 'Hoja de vida',
-  },
-  {
-    id: 'alertas',
-    label: 'Alertas',
-    eyebrow: 'Notificaciones',
-    title: 'Centro de alertas',
-  },
-  {
-    id: 'ayuda',
-    label: 'Ayuda',
-    eyebrow: 'Soporte',
-    title: 'Ayuda y accesibilidad',
+    title: 'Estados críticos',
+    items: [
+      { id: 'detalle-postulacion', label: 'Detalle de postulación' },
+      { id: 'documentos', label: 'Documentos' },
+      { id: 'error-validacion', label: 'Error / validación' },
+    ],
   },
 ]
 
-const featuredJobs = [
+const allMenuItems = menuGroups.flatMap((group) => group.items)
+
+const jobs = [
   {
-    code: 'SIMO-24791',
-    title: 'Profesional universitario de sistemas',
-    entity: 'Alcaldía de Cali',
-    city: 'Cali, Valle del Cauca',
-    salary: '$4.850.000',
-    vacancies: 3,
-    deadline: 'Cierra en 6 días',
-    tags: ['Sistemas', 'Profesional', 'Presencial'],
+    code: 'OPEC 182654',
+    title: 'Analista III',
+    entity: 'DIAN',
+    level: 'Profesional',
+    city: 'Bogotá D.C.',
+    vacancies: 5,
+    salary: '$4.870.000',
+    status: 'Abierta',
+    statusTone: 'success',
   },
   {
-    code: 'SIMO-24822',
+    code: 'OPEC 194728',
+    title: 'Profesional universitario',
+    entity: 'Alcaldía de Cali',
+    level: 'Profesional',
+    city: 'Cali',
+    vacancies: 3,
+    salary: '$4.250.000',
+    status: 'Abierta',
+    statusTone: 'success',
+  },
+  {
+    code: 'OPEC 201245',
     title: 'Técnico administrativo',
     entity: 'Gobernación del Valle',
-    city: 'Palmira, Valle del Cauca',
-    salary: '$2.950.000',
+    level: 'Técnico',
+    city: 'Palmira',
     vacancies: 8,
-    deadline: 'Cierra en 10 días',
-    tags: ['Técnico', 'Administrativo', 'Mixto'],
+    salary: '$2.950.000',
+    status: 'Próxima a cerrar',
+    statusTone: 'warning',
   },
   {
-    code: 'SIMO-25008',
-    title: 'Analista de datos junior',
-    entity: 'Entidad Nacional Digital',
+    code: 'OPEC 217680',
+    title: 'Auxiliar de archivo',
+    entity: 'Secretaría de Educación',
+    level: 'Asistencial',
+    city: 'Tuluá',
+    vacancies: 12,
+    salary: '$1.980.000',
+    status: 'Abierta',
+    statusTone: 'success',
+  },
+]
+
+const entities = [
+  {
+    name: 'Dirección de Impuestos y Aduanas Nacionales',
+    short: 'DIAN',
+    type: 'Entidad nacional',
     city: 'Bogotá D.C.',
-    salary: '$4.200.000',
-    vacancies: 5,
-    deadline: 'Cierra en 14 días',
-    tags: ['Datos', 'Junior', 'Remoto parcial'],
+    jobs: 42,
+    status: 'Convocatoria activa',
+  },
+  {
+    name: 'Alcaldía de Santiago de Cali',
+    short: 'CALI',
+    type: 'Entidad territorial',
+    city: 'Cali',
+    jobs: 18,
+    status: 'Inscripciones abiertas',
+  },
+  {
+    name: 'Gobernación del Valle del Cauca',
+    short: 'VALLE',
+    type: 'Entidad departamental',
+    city: 'Valle del Cauca',
+    jobs: 24,
+    status: 'En publicación',
   },
 ]
 
-const applicationSteps = [
+const experienceRows = [
   {
-    number: '01',
-    title: 'Verifica requisitos',
-    description: 'Confirma estudios, experiencia, documentos y ciudad antes de iniciar.',
+    company: 'Registraduría Nacional del Estado Civil',
+    role: 'Apoyo administrativo y validación de información',
+    city: 'Tuluá',
+    period: '2024 - 2025',
+    status: 'Validada',
+    tone: 'success',
   },
   {
-    number: '02',
-    title: 'Actualiza hoja de vida',
-    description: 'Carga soportes y revisa que la información esté completa.',
+    company: 'Proyecto académico AnimeDev',
+    role: 'Desarrollador Android / Backend',
+    city: 'Cali',
+    period: '2025 - 2026',
+    status: 'En revisión',
+    tone: 'warning',
   },
   {
-    number: '03',
-    title: 'Selecciona empleo',
-    description: 'Guarda la convocatoria o continúa directamente con la inscripción.',
-  },
-  {
-    number: '04',
-    title: 'Confirma inscripción',
-    description: 'Revisa el resumen final y acepta la declaración de veracidad.',
-  },
-]
-
-const savedProcesses = [
-  {
-    title: 'Profesional universitario de sistemas',
-    status: 'Inscripción en revisión',
-    progress: 68,
-    next: 'Validación documental',
-  },
-  {
-    title: 'Técnico administrativo',
-    status: 'Guardado',
-    progress: 25,
-    next: 'Completar inscripción',
-  },
-  {
-    title: 'Analista de datos junior',
-    status: 'Convocatoria consultada',
-    progress: 15,
-    next: 'Revisar requisitos',
+    company: 'Prácticas de QA funcional',
+    role: 'Validación SQL y reporte de incidencias',
+    city: 'Remoto',
+    period: '2023 - 2024',
+    status: 'Validada',
+    tone: 'success',
   },
 ]
 
-const notifications = [
+const studiesRows = [
   {
-    type: 'Importante',
-    title: 'Tu inscripción fue recibida',
-    text: 'La convocatoria SIMO-24791 pasó a revisión documental.',
-    time: 'Hoy, 9:20 a. m.',
+    program: 'Ingeniería de Sistemas',
+    institution: 'Universidad del Valle',
+    level: 'Profesional',
+    year: '2026',
+    status: 'En curso',
+    tone: 'info',
   },
   {
-    type: 'Recordatorio',
-    title: 'Convocatoria próxima a cerrar',
-    text: 'Tienes 6 días para finalizar la inscripción al empleo guardado.',
-    time: 'Ayer, 5:45 p. m.',
+    program: 'Técnico en Desarrollo de Software',
+    institution: 'SENA',
+    level: 'Técnico',
+    year: '2024',
+    status: 'Validado',
+    tone: 'success',
   },
   {
-    type: 'Sistema',
-    title: 'Documento pendiente',
-    text: 'El soporte de experiencia laboral necesita fecha de finalización.',
-    time: 'Lunes, 2:10 p. m.',
+    program: 'Curso de pruebas funcionales',
+    institution: 'Formación complementaria',
+    level: 'Curso',
+    year: '2023',
+    status: 'Validado',
+    tone: 'success',
   },
+]
+
+const documentRows = [
+  {
+    name: 'Cédula de ciudadanía',
+    type: 'Identificación',
+    date: '10/05/2026',
+    status: 'Vigente',
+    tone: 'success',
+  },
+  {
+    name: 'Diploma técnico',
+    type: 'Formación académica',
+    date: '12/05/2026',
+    status: 'En revisión',
+    tone: 'warning',
+  },
+  {
+    name: 'Certificado laboral',
+    type: 'Experiencia',
+    date: '16/05/2026',
+    status: 'Vigente',
+    tone: 'success',
+  },
+  {
+    name: 'Tarjeta profesional',
+    type: 'Documento opcional',
+    date: 'Pendiente',
+    status: 'Por cargar',
+    tone: 'danger',
+  },
+]
+
+const postulationSteps = [
+  { label: 'Inscripción recibida', status: 'Completado', tone: 'success' },
+  { label: 'Verificación de requisitos', status: 'En curso', tone: 'warning' },
+  { label: 'Evaluación documental', status: 'Pendiente', tone: 'muted' },
+  { label: 'Publicación de resultados', status: 'Pendiente', tone: 'muted' },
 ]
 
 function App() {
   const [activeScreen, setActiveScreen] = useState('inicio')
-  const [searchTerm, setSearchTerm] = useState('sistemas')
 
-  const activeItem = useMemo(
-    () => navItems.find((item) => item.id === activeScreen) ?? navItems[0],
+  const currentItem = useMemo(
+    () => allMenuItems.find((item) => item.id === activeScreen) ?? allMenuItems[0],
     [activeScreen],
   )
 
-  const filteredJobs = featuredJobs.filter((job) => {
-    const query = searchTerm.toLowerCase()
-    return (
-      job.title.toLowerCase().includes(query) ||
-      job.entity.toLowerCase().includes(query) ||
-      job.city.toLowerCase().includes(query) ||
-      job.tags.join(' ').toLowerCase().includes(query)
-    )
-  })
-
   return (
-    <div className="app-shell">
-      <a className="skip-link" href="#contenido-principal">
-        Saltar al contenido principal
-      </a>
+    <div className="simo-app">
+      <Sidebar activeScreen={activeScreen} setActiveScreen={setActiveScreen} />
 
-      <aside className="sidebar" aria-label="Navegación principal del prototipo">
-        <div className="brand-block">
-          <div className="brand-logo" aria-hidden="true">
-            S
-          </div>
-          <div>
-            <p className="brand-kicker">Rediseño UX</p>
-            <h1>SIMO</h1>
-          </div>
+      <main className="workspace">
+        <Topbar title={currentItem.label} />
+
+        <div className="workspace-grid">
+          <section className="screen-card">
+            <ScreenRenderer activeScreen={activeScreen} setActiveScreen={setActiveScreen} />
+          </section>
+
+          <AssistPanel activeScreen={activeScreen} setActiveScreen={setActiveScreen} />
         </div>
-
-        <nav className="nav-list">
-          {navItems.map((item, index) => (
-            <button
-              key={item.id}
-              type="button"
-              className={`nav-button ${activeScreen === item.id ? 'is-active' : ''}`}
-              onClick={() => setActiveScreen(item.id)}
-              aria-current={activeScreen === item.id ? 'page' : undefined}
-            >
-              <span className="nav-index">{String(index + 1).padStart(2, '0')}</span>
-              <span>{item.label}</span>
-            </button>
-          ))}
-        </nav>
-
-        <div className="sidebar-card">
-          <p className="sidebar-card-title">Objetivo UX</p>
-          <p>
-            Reducir fricción, mejorar comprensión y guiar al ciudadano con lenguaje claro.
-          </p>
-        </div>
-      </aside>
-
-      <main id="contenido-principal" className="main-content">
-        <header className="topbar">
-          <div>
-            <p className="eyebrow">{activeItem.eyebrow}</p>
-            <h2>{activeItem.title}</h2>
-          </div>
-
-          <div className="topbar-actions" aria-label="Acciones rápidas">
-            <button type="button" className="ghost-button">
-              Alto contraste
-            </button>
-            <button type="button" className="primary-button" onClick={() => setActiveScreen('acceso')}>
-              Iniciar sesión
-            </button>
-          </div>
-        </header>
-
-        <section className="content-card">
-          {activeScreen === 'inicio' && <HomeScreen setActiveScreen={setActiveScreen} />}
-          {activeScreen === 'acceso' && <AccessScreen setActiveScreen={setActiveScreen} />}
-          {activeScreen === 'panel' && <DashboardScreen setActiveScreen={setActiveScreen} />}
-          {activeScreen === 'busqueda' && (
-            <SearchScreen
-              searchTerm={searchTerm}
-              setSearchTerm={setSearchTerm}
-              filteredJobs={filteredJobs}
-              setActiveScreen={setActiveScreen}
-            />
-          )}
-          {activeScreen === 'detalle' && <DetailScreen setActiveScreen={setActiveScreen} />}
-          {activeScreen === 'inscripcion' && <ApplicationScreen setActiveScreen={setActiveScreen} />}
-          {activeScreen === 'mis-empleos' && <MyJobsScreen setActiveScreen={setActiveScreen} />}
-          {activeScreen === 'hoja-vida' && <ProfileScreen setActiveScreen={setActiveScreen} />}
-          {activeScreen === 'alertas' && <AlertsScreen />}
-          {activeScreen === 'ayuda' && <HelpScreen />}
-        </section>
       </main>
     </div>
   )
 }
 
+function Sidebar({ activeScreen, setActiveScreen }) {
+  return (
+    <aside className="sidebar">
+      <div className="brand">
+        <div className="brand-mark">S</div>
+        <div>
+          <strong>SIMO</strong>
+          <span>Sistema de Mérito y Oportunidad</span>
+        </div>
+      </div>
+
+      <nav className="side-nav" aria-label="Navegación del prototipo">
+        {menuGroups.map((group) => (
+          <div className="nav-group" key={group.title}>
+            <p>{group.title}</p>
+            {group.items.map((item) => (
+              <button
+                key={item.id}
+                type="button"
+                className={activeScreen === item.id ? 'active' : ''}
+                onClick={() => setActiveScreen(item.id)}
+              >
+                <span className="nav-dot" />
+                {item.label}
+              </button>
+            ))}
+          </div>
+        ))}
+      </nav>
+
+      <div className="need-help">
+        <div className="help-icon">?</div>
+        <strong>¿Necesita ayuda?</strong>
+        <span>Consulte las guías rápidas del proceso.</span>
+      </div>
+    </aside>
+  )
+}
+
+function Topbar({ title }) {
+  return (
+    <header className="topbar">
+      <div>
+        <p>Inicio / Rediseño SIMO</p>
+        <h1>{title}</h1>
+      </div>
+
+      <div className="top-actions">
+        <button type="button" className="ghost-button">
+          Alto contraste
+        </button>
+        <button type="button" className="primary-button">
+          Iniciar sesión
+        </button>
+      </div>
+    </header>
+  )
+}
+
+function ScreenRenderer({ activeScreen, setActiveScreen }) {
+  const screens = {
+    inicio: <HomeScreen setActiveScreen={setActiveScreen} />,
+    convocatorias: <JobsScreen setActiveScreen={setActiveScreen} />,
+    'detalle-convocatoria': <JobDetailScreen setActiveScreen={setActiveScreen} />,
+    entidades: <EntitiesScreen />,
+    perfil: <ProfileScreen setActiveScreen={setActiveScreen} />,
+    'datos-personales': <PersonalDataScreen />,
+    experiencia: <ExperienceScreen />,
+    estudios: <StudiesScreen />,
+    'inscripcion-datos': <InscriptionDataScreen setActiveScreen={setActiveScreen} />,
+    'inscripcion-documentos': <InscriptionDocumentsScreen setActiveScreen={setActiveScreen} />,
+    'revision-envio': <ReviewScreen setActiveScreen={setActiveScreen} />,
+    confirmacion: <ConfirmationScreen setActiveScreen={setActiveScreen} />,
+    'detalle-postulacion': <PostulationDetailScreen />,
+    documentos: <DocumentsScreen />,
+    'error-validacion': <ErrorValidationScreen setActiveScreen={setActiveScreen} />,
+  }
+
+  return screens[activeScreen] ?? screens.inicio
+}
+
 function HomeScreen({ setActiveScreen }) {
   return (
-    <div className="screen-grid hero-grid">
-      <div className="hero-copy">
-        <span className="status-pill">Prototipo de alta fidelidad</span>
-        <h3>Encuentra convocatorias públicas sin perderte en el proceso.</h3>
-        <p>
-          Esta propuesta reorganiza la experiencia de SIMO alrededor de tareas reales:
-          buscar empleos, revisar requisitos, postularse y hacer seguimiento sin ambigüedad.
-        </p>
+    <div className="module">
+      <section className="public-hero">
+        <div className="hero-content">
+          <span className="success-label">Convocatorias públicas abiertas</span>
+          <h2>
+            Encuentre su próxima oportunidad en el <strong>empleo público</strong>
+          </h2>
+          <p>
+            Busque por cargo, entidad, ciudad o código OPEC. La experiencia está organizada para
+            que comprenda requisitos, fechas y próximos pasos sin perder el contexto.
+          </p>
 
-        <div className="hero-actions">
-          <button type="button" className="primary-button large" onClick={() => setActiveScreen('busqueda')}>
-            Buscar convocatorias
-          </button>
-          <button type="button" className="secondary-button large" onClick={() => setActiveScreen('ayuda')}>
-            Ver guía rápida
-          </button>
-        </div>
-      </div>
-
-      <div className="hero-panel" aria-label="Resumen visual de mejoras">
-        <div className="hero-panel-header">
-          <span>SIMO claro</span>
-          <strong>+ UX Writing</strong>
-        </div>
-
-        <div className="metric-row">
-          <MetricCard value="10" label="pantallas clave" />
-          <MetricCard value="4" label="pasos de inscripción" />
-          <MetricCard value="100%" label="lenguaje ciudadano" />
-        </div>
-
-        <div className="mini-flow">
-          <span>Buscar</span>
-          <span>Comparar</span>
-          <span>Postularse</span>
-          <span>Seguir avance</span>
-        </div>
-      </div>
-
-      <section className="wide-card">
-        <div className="section-heading">
-          <p className="eyebrow">Problema detectado</p>
-          <h4>La información existe, pero el usuario necesita orientación.</h4>
-        </div>
-
-        <div className="insight-grid">
-          <InsightCard
-            title="Antes"
-            text="Menús densos, etiquetas técnicas y rutas poco evidentes para completar una inscripción."
-          />
-          <InsightCard
-            title="Después"
-            text="Flujo guiado, mensajes accionables, filtros visibles y seguimiento del estado de cada empleo."
-          />
-          <InsightCard
-            title="Impacto esperado"
-            text="Menos abandono, menor carga cognitiva y mayor confianza del ciudadano en cada decisión."
-          />
-        </div>
-      </section>
-    </div>
-  )
-}
-
-function AccessScreen({ setActiveScreen }) {
-  return (
-    <div className="two-column">
-      <section className="form-card">
-        <p className="eyebrow">Ingreso seguro</p>
-        <h3>Accede a tu cuenta</h3>
-        <p className="muted">
-          Usa tus datos registrados para consultar postulaciones, documentos y alertas.
-        </p>
-
-        <form className="stacked-form">
-          <label>
-            Correo electrónico
-            <input type="email" placeholder="nombre@correo.com" />
-          </label>
-
-          <label>
-            Contraseña
-            <input type="password" placeholder="Ingresa tu contraseña" />
-          </label>
-
-          <div className="form-options">
-            <label className="check-row">
-              <input type="checkbox" />
-              Recordarme
-            </label>
-            <button type="button" className="link-button">
-              ¿Olvidaste tu contraseña?
+          <div className="hero-actions">
+            <button
+              type="button"
+              className="primary-button"
+              onClick={() => setActiveScreen('convocatorias')}
+            >
+              Explorar convocatorias
+            </button>
+            <button
+              type="button"
+              className="secondary-button"
+              onClick={() => setActiveScreen('entidades')}
+            >
+              Ver entidades participantes
             </button>
           </div>
-
-          <button type="button" className="primary-button full" onClick={() => setActiveScreen('panel')}>
-            Entrar al panel
-          </button>
-        </form>
-      </section>
-
-      <section className="support-card">
-        <span className="status-pill">Nuevo usuario</span>
-        <h3>Crea tu cuenta en menos pasos</h3>
-        <p>
-          El registro se divide en bloques cortos: datos básicos, contacto, documento e intereses
-          laborales.
-        </p>
-
-        <ul className="check-list">
-          <li>Mensajes claros sobre campos obligatorios.</li>
-          <li>Validación visible antes de enviar.</li>
-          <li>Ayuda contextual para documentos y soportes.</li>
-        </ul>
-
-        <button type="button" className="secondary-button full" onClick={() => setActiveScreen('hoja-vida')}>
-          Completar hoja de vida
-        </button>
-      </section>
-    </div>
-  )
-}
-
-function DashboardScreen({ setActiveScreen }) {
-  return (
-    <div className="screen-grid">
-      <section className="welcome-card">
-        <div>
-          <p className="eyebrow">Hola, Daniel</p>
-          <h3>Tu proceso laboral en una sola vista</h3>
-          <p>
-            Revisa tus convocatorias guardadas, postulaciones activas y documentos pendientes.
-          </p>
         </div>
 
-        <button type="button" className="primary-button" onClick={() => setActiveScreen('busqueda')}>
-          Explorar empleos
-        </button>
+        <div className="hero-illustration" aria-hidden="true">
+          <div className="person one" />
+          <div className="person two" />
+          <div className="building-icon">🏛</div>
+        </div>
       </section>
 
-      <div className="metric-row">
-        <MetricCard value="3" label="empleos guardados" />
-        <MetricCard value="1" label="inscripción activa" />
-        <MetricCard value="82%" label="hoja de vida completa" />
-      </div>
+      <FilterStrip />
 
-      <section className="wide-card">
-        <div className="section-heading">
-          <p className="eyebrow">Siguiente mejor acción</p>
-          <h4>Continúa donde lo dejaste</h4>
-        </div>
+      <section className="section-block">
+        <SectionHeader
+          kicker="Resultados destacados"
+          title="Convocatorias disponibles"
+          action="Ver todas"
+          onAction={() => setActiveScreen('convocatorias')}
+        />
 
-        <div className="process-list">
-          {savedProcesses.map((process) => (
-            <article className="process-card" key={process.title}>
-              <div>
-                <h5>{process.title}</h5>
-                <p>{process.status}</p>
-              </div>
-
-              <div className="progress-block">
-                <div className="progress-bar" aria-label={`Avance ${process.progress}%`}>
-                  <span style={{ width: `${process.progress}%` }} />
-                </div>
-                <small>{process.next}</small>
-              </div>
-            </article>
+        <div className="compact-cards">
+          {jobs.slice(0, 3).map((job) => (
+            <JobMiniCard key={job.code} job={job} onClick={() => setActiveScreen('detalle-convocatoria')} />
           ))}
         </div>
       </section>
@@ -438,371 +374,941 @@ function DashboardScreen({ setActiveScreen }) {
   )
 }
 
-function SearchScreen({ searchTerm, setSearchTerm, filteredJobs, setActiveScreen }) {
+function JobsScreen({ setActiveScreen }) {
   return (
-    <div className="screen-grid">
-      <section className="search-hero">
-        <div>
-          <p className="eyebrow">Búsqueda inteligente</p>
-          <h3>Filtra por cargo, entidad, ciudad o palabra clave</h3>
+    <div className="module">
+      <SectionHeader
+        kicker="Búsqueda de oportunidades"
+        title="Convocatorias disponibles"
+        description="Filtre los resultados por ubicación, nivel, entidad o palabra clave."
+      />
+
+      <FilterStrip />
+
+      <div className="data-layout">
+        <aside className="filter-panel">
+          <h3>Filtrar resultados</h3>
+
+          <FilterGroup title="Nivel jerárquico" values={['Profesional', 'Técnico', 'Asistencial']} />
+          <FilterGroup title="Ciudad" values={['Bogotá D.C.', 'Cali', 'Palmira', 'Tuluá']} />
+          <FilterGroup title="Estado" values={['Abierta', 'Próxima a cerrar']} />
+        </aside>
+
+        <div className="table-card">
+          <TableHeader title="Resultados encontrados" count="4 convocatorias" />
+
+          <table>
+            <thead>
+              <tr>
+                <th>Código</th>
+                <th>Empleo</th>
+                <th>Entidad</th>
+                <th>Nivel</th>
+                <th>Vacantes</th>
+                <th>Estado</th>
+                <th />
+              </tr>
+            </thead>
+
+            <tbody>
+              {jobs.map((job) => (
+                <tr key={job.code}>
+                  <td>{job.code}</td>
+                  <td>
+                    <strong>{job.title}</strong>
+                    <small>{job.city}</small>
+                  </td>
+                  <td>{job.entity}</td>
+                  <td>{job.level}</td>
+                  <td>{job.vacancies}</td>
+                  <td>
+                    <Status text={job.status} tone={job.statusTone} />
+                  </td>
+                  <td>
+                    <button
+                      type="button"
+                      className="table-action"
+                      onClick={() => setActiveScreen('detalle-convocatoria')}
+                    >
+                      Ver
+                    </button>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
         </div>
-
-        <label className="search-box">
-          <span>Buscar convocatoria</span>
-          <input
-            type="search"
-            value={searchTerm}
-            placeholder="Ejemplo: sistemas, técnico, Cali"
-            onChange={(event) => setSearchTerm(event.target.value)}
-          />
-        </label>
-      </section>
-
-      <section className="filter-row" aria-label="Filtros de búsqueda">
-        <button type="button">Ciudad: Cali</button>
-        <button type="button">Nivel: Profesional</button>
-        <button type="button">Modalidad: Presencial</button>
-        <button type="button">Salario: + $3M</button>
-      </section>
-
-      <section className="job-list">
-        {filteredJobs.length > 0 ? (
-          filteredJobs.map((job) => (
-            <JobCard key={job.code} job={job} setActiveScreen={setActiveScreen} />
-          ))
-        ) : (
-          <div className="empty-state">
-            <h4>No encontramos resultados exactos</h4>
-            <p>Prueba con una palabra más general, como “administrativo” o “Cali”.</p>
-          </div>
-        )}
-      </section>
+      </div>
     </div>
   )
 }
 
-function DetailScreen({ setActiveScreen }) {
+function JobDetailScreen({ setActiveScreen }) {
   return (
-    <div className="screen-grid">
-      <section className="detail-header">
+    <div className="module">
+      <section className="detail-hero">
         <div>
-          <span className="status-pill">Convocatoria abierta</span>
-          <h3>Profesional universitario de sistemas</h3>
-          <p>Alcaldía de Cali · SIMO-24791 · Cali, Valle del Cauca</p>
+          <Status text="Convocatoria abierta" tone="success" />
+          <h2>Analista III</h2>
+          <p>DIAN · OPEC 182654 · Bogotá D.C.</p>
         </div>
 
-        <div className="salary-card">
-          <span>Asignación mensual</span>
-          <strong>$4.850.000</strong>
+        <div className="detail-actions">
+          <button
+            type="button"
+            className="primary-button"
+            onClick={() => setActiveScreen('inscripcion-datos')}
+          >
+            Iniciar inscripción
+          </button>
+          <button type="button" className="secondary-button">
+            Guardar convocatoria
+          </button>
         </div>
       </section>
 
-      <section className="detail-grid">
-        <InfoBlock title="Requisitos mínimos">
-          <ul>
-            <li>Título profesional en Ingeniería de Sistemas o áreas afines.</li>
-            <li>Tarjeta profesional vigente cuando aplique.</li>
-            <li>24 meses de experiencia relacionada.</li>
-          </ul>
-        </InfoBlock>
-
-        <InfoBlock title="Funciones principales">
-          <ul>
-            <li>Apoyar la gestión de sistemas de información institucionales.</li>
-            <li>Realizar seguimiento a incidentes, reportes y disponibilidad.</li>
-            <li>Documentar procesos técnicos y mejoras operativas.</li>
-          </ul>
-        </InfoBlock>
-
-        <InfoBlock title="Fechas clave">
-          <ul>
-            <li>Publicación: 20 de mayo de 2026.</li>
-            <li>Cierre de inscripción: 3 de junio de 2026.</li>
-            <li>Validación documental: posterior al cierre.</li>
-          </ul>
-        </InfoBlock>
-      </section>
-
-      <section className="action-strip">
-        <p>Antes de inscribirte, revisa que tu hoja de vida tenga soportes actualizados.</p>
-        <button type="button" className="primary-button" onClick={() => setActiveScreen('inscripcion')}>
-          Iniciar inscripción
-        </button>
-      </section>
-    </div>
-  )
-}
-
-function ApplicationScreen({ setActiveScreen }) {
-  return (
-    <div className="screen-grid">
-      <section className="section-heading">
-        <p className="eyebrow">Inscripción guiada</p>
-        <h3>Postúlate con una ruta clara de cuatro pasos</h3>
-        <p>
-          El rediseño evita que el usuario avance sin entender qué falta, qué ya fue validado y
-          qué se enviará.
-        </p>
-      </section>
-
-      <div className="steps-grid">
-        {applicationSteps.map((step) => (
-          <article className="step-card" key={step.number}>
-            <span>{step.number}</span>
-            <h4>{step.title}</h4>
-            <p>{step.description}</p>
-          </article>
-        ))}
+      <div className="detail-stats">
+        <StatCard label="Vacantes" value="5" />
+        <StatCard label="Salario" value="$4.870.000" />
+        <StatCard label="Nivel" value="Profesional" />
+        <StatCard label="Cierre" value="6 días" />
       </div>
 
-      <section className="review-card">
-        <div>
-          <h4>Resumen antes de enviar</h4>
-          <p>
-            Cargo seleccionado: Profesional universitario de sistemas. Tu perfil cumple los
-            requisitos mínimos, pero hay un soporte por revisar.
-          </p>
-        </div>
-
-        <ul className="check-list compact">
-          <li>Datos personales completos.</li>
-          <li>Experiencia laboral cargada.</li>
-          <li>Documento de identidad verificado.</li>
-          <li className="warning">Soporte académico pendiente de revisión.</li>
-        </ul>
-
-        <button type="button" className="primary-button full" onClick={() => setActiveScreen('mis-empleos')}>
-          Confirmar inscripción
+      <div className="tab-strip">
+        <button type="button" className="selected">
+          Resumen
         </button>
-      </section>
+        <button type="button">Requisitos</button>
+        <button type="button">Funciones</button>
+        <button type="button">Documentos solicitados</button>
+        <button type="button">Cronograma</button>
+      </div>
+
+      <div className="detail-grid">
+        <InfoCard
+          title="Objetivo del empleo"
+          text="Gestionar, analizar y documentar información asociada a procesos internos de la entidad."
+        />
+        <InfoCard
+          title="Requisitos mínimos"
+          text="Título profesional en Ingeniería de Sistemas, Administración o áreas afines, más experiencia relacionada."
+        />
+        <InfoCard
+          title="Próximo paso"
+          text="Revise que sus documentos estén actualizados antes de iniciar la inscripción."
+        />
+      </div>
     </div>
   )
 }
 
-function MyJobsScreen({ setActiveScreen }) {
+function EntitiesScreen() {
   return (
-    <div className="screen-grid">
-      <section className="section-heading">
-        <p className="eyebrow">Seguimiento transparente</p>
-        <h3>Consulta el estado de cada proceso</h3>
-      </section>
+    <div className="module">
+      <SectionHeader
+        kicker="Instituciones participantes"
+        title="Entidades participantes"
+        description="Consulte las entidades con convocatorias activas y revise sus oportunidades publicadas."
+      />
 
-      <div className="tracking-list">
-        {savedProcesses.map((process) => (
-          <article className="tracking-card" key={process.title}>
-            <div>
-              <h4>{process.title}</h4>
-              <p>{process.status}</p>
-            </div>
+      <FilterStrip />
 
-            <div className="tracking-meta">
-              <span>{process.progress}%</span>
-              <button type="button" className="secondary-button" onClick={() => setActiveScreen('detalle')}>
-                Ver detalle
-              </button>
-            </div>
-          </article>
-        ))}
+      <div className="table-card">
+        <TableHeader title="Entidades registradas" count="3 entidades" />
+
+        <table>
+          <thead>
+            <tr>
+              <th>Entidad</th>
+              <th>Tipo</th>
+              <th>Ubicación</th>
+              <th>Convocatorias</th>
+              <th>Estado</th>
+            </tr>
+          </thead>
+
+          <tbody>
+            {entities.map((entity) => (
+              <tr key={entity.short}>
+                <td>
+                  <div className="entity-cell">
+                    <span>{entity.short}</span>
+                    <div>
+                      <strong>{entity.name}</strong>
+                      <small>{entity.short}</small>
+                    </div>
+                  </div>
+                </td>
+                <td>{entity.type}</td>
+                <td>{entity.city}</td>
+                <td>{entity.jobs}</td>
+                <td>
+                  <Status text={entity.status} tone="success" />
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
       </div>
-
-      <section className="tip-card">
-        <h4>Microcopy propuesto</h4>
-        <p>
-          “Tu inscripción está en revisión. No necesitas hacer nada por ahora. Te avisaremos si
-          algún documento requiere corrección.”
-        </p>
-      </section>
     </div>
   )
 }
 
 function ProfileScreen({ setActiveScreen }) {
   return (
-    <div className="screen-grid">
-      <section className="profile-header">
-        <div className="avatar" aria-hidden="true">
-          DC
-        </div>
+    <div className="module">
+      <section className="profile-hero">
+        <div className="avatar">DC</div>
 
-        <div>
-          <p className="eyebrow">Hoja de vida</p>
-          <h3>Daniel Cuesta</h3>
+        <div className="profile-main">
+          <Status text="Perfil actualizado" tone="success" />
+          <h2>Daniel José Cuestas</h2>
           <p>Ingeniería de Sistemas · Cali, Valle del Cauca</p>
+
+          <div className="profile-meta">
+            <span>daniel.cuestas@correounivalle.edu.co</span>
+            <span>Documento verificado</span>
+          </div>
         </div>
 
-        <button type="button" className="primary-button" onClick={() => setActiveScreen('busqueda')}>
-          Ver empleos compatibles
+        <button
+          type="button"
+          className="primary-button"
+          onClick={() => setActiveScreen('datos-personales')}
+        >
+          Editar información
         </button>
       </section>
 
-      <div className="metric-row">
-        <MetricCard value="82%" label="perfil completo" />
-        <MetricCard value="4" label="soportes cargados" />
-        <MetricCard value="1" label="alerta pendiente" />
+      <div className="detail-stats">
+        <StatCard label="Completitud" value="68%" />
+        <StatCard label="Experiencias" value="3" />
+        <StatCard label="Estudios" value="3" />
+        <StatCard label="Documentos" value="4" />
       </div>
 
-      <section className="detail-grid">
-        <InfoBlock title="Datos personales">
-          <p>Documento, contacto, ubicación y disponibilidad laboral.</p>
-        </InfoBlock>
+      <section className="section-block">
+        <SectionHeader kicker="Accesos rápidos" title="Gestione su cuenta" />
 
-        <InfoBlock title="Formación académica">
-          <p>Estudios técnicos, universitarios, certificaciones y soportes cargados.</p>
-        </InfoBlock>
-
-        <InfoBlock title="Experiencia">
-          <p>Historial laboral organizado por cargo, entidad, fechas y funciones.</p>
-        </InfoBlock>
+        <div className="quick-grid">
+          <QuickCard
+            title="Datos personales"
+            text="Actualice contacto, ubicación y documento."
+            onClick={() => setActiveScreen('datos-personales')}
+          />
+          <QuickCard
+            title="Experiencia"
+            text="Consulte experiencia laboral cargada."
+            onClick={() => setActiveScreen('experiencia')}
+          />
+          <QuickCard
+            title="Estudios"
+            text="Revise formación académica y soportes."
+            onClick={() => setActiveScreen('estudios')}
+          />
+        </div>
       </section>
+    </div>
+  )
+}
 
-      <section className="action-strip">
-        <p>Una hoja de vida completa mejora la compatibilidad con convocatorias.</p>
+function PersonalDataScreen() {
+  return (
+    <div className="module">
+      <SectionHeader
+        kicker="Mi cuenta"
+        title="Datos personales"
+        description="Actualice únicamente la información que requiere corrección."
+      />
+
+      <div className="form-layout">
+        <div className="form-card">
+          <h3>Información básica</h3>
+
+          <div className="form-grid">
+            <Field label="Tipo de documento" value="Cédula de ciudadanía" />
+            <Field label="Número de documento" value="1.234.567.890" />
+            <Field label="Nombres" value="Daniel José" />
+            <Field label="Apellidos" value="Cuestas Parada" />
+            <Field label="Fecha de nacimiento" value="15/06/2001" />
+            <Field label="Género" value="Masculino" />
+          </div>
+        </div>
+
+        <div className="form-card">
+          <h3>Información de contacto</h3>
+
+          <div className="form-grid">
+            <Field label="Correo electrónico" value="daniel.cuestas@correounivalle.edu.co" />
+            <Field label="Celular" value="300 000 0000" />
+            <Field label="Departamento" value="Valle del Cauca" />
+            <Field label="Municipio" value="Cali" />
+          </div>
+        </div>
+      </div>
+    </div>
+  )
+}
+
+function ExperienceScreen() {
+  return (
+    <div className="module">
+      <SectionHeader
+        kicker="Hoja de vida"
+        title="Experiencia laboral"
+        description="Registre experiencia relacionada con las convocatorias a las que desea postularse."
+        action="+ Agregar experiencia"
+      />
+
+      <div className="table-card">
+        <TableHeader title="Experiencia registrada" count="3 registros" />
+
+        <table>
+          <thead>
+            <tr>
+              <th>Empresa</th>
+              <th>Cargo / funciones</th>
+              <th>Ciudad</th>
+              <th>Periodo</th>
+              <th>Estado</th>
+              <th>Acciones</th>
+            </tr>
+          </thead>
+
+          <tbody>
+            {experienceRows.map((row) => (
+              <tr key={row.company}>
+                <td>{row.company}</td>
+                <td>
+                  <strong>{row.role}</strong>
+                </td>
+                <td>{row.city}</td>
+                <td>{row.period}</td>
+                <td>
+                  <Status text={row.status} tone={row.tone} />
+                </td>
+                <td>
+                  <button type="button" className="table-action">
+                    Editar
+                  </button>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  )
+}
+
+function StudiesScreen() {
+  return (
+    <div className="module">
+      <SectionHeader
+        kicker="Hoja de vida"
+        title="Formación académica"
+        description="Mantenga actualizados sus estudios y soportes académicos."
+        action="+ Agregar estudio"
+      />
+
+      <div className="table-card">
+        <TableHeader title="Estudios registrados" count="3 registros" />
+
+        <table>
+          <thead>
+            <tr>
+              <th>Programa</th>
+              <th>Institución</th>
+              <th>Nivel</th>
+              <th>Año</th>
+              <th>Estado</th>
+            </tr>
+          </thead>
+
+          <tbody>
+            {studiesRows.map((row) => (
+              <tr key={row.program}>
+                <td>
+                  <strong>{row.program}</strong>
+                </td>
+                <td>{row.institution}</td>
+                <td>{row.level}</td>
+                <td>{row.year}</td>
+                <td>
+                  <Status text={row.status} tone={row.tone} />
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  )
+}
+
+function InscriptionDataScreen({ setActiveScreen }) {
+  return (
+    <div className="module">
+      <Stepper active={1} />
+
+      <SectionHeader
+        kicker="Inscripción a convocatoria"
+        title="Paso 1: información personal"
+        description="Complete la información solicitada. Los campos obligatorios aparecen marcados para evitar errores al enviar."
+      />
+
+      <div className="form-layout">
+        <div className="form-card">
+          <h3>Datos básicos</h3>
+
+          <div className="form-grid">
+            <Field label="Tipo de documento" value="Cédula de ciudadanía" />
+            <Field label="Número de documento" value="1.234.567.890" />
+            <Field label="Fecha de expedición" value="12/05/2019" />
+            <Field label="País" value="Colombia" />
+            <Field label="Departamento" value="Valle del Cauca" />
+            <Field label="Municipio" value="Cali" />
+          </div>
+        </div>
+
+        <div className="form-card">
+          <h3>Información de contacto</h3>
+
+          <div className="form-grid">
+            <Field label="Correo electrónico" value="daniel.cuestas@correounivalle.edu.co" />
+            <Field label="Confirmar correo" value="daniel.cuestas@correounivalle.edu.co" />
+            <Field label="Teléfono celular" value="300 000 0000" />
+            <Field label="Dirección" value="Cali, Valle del Cauca" />
+          </div>
+        </div>
+      </div>
+
+      <footer className="screen-footer">
         <button type="button" className="secondary-button">
-          Actualizar información
+          Guardar borrador
         </button>
-      </section>
+        <button
+          type="button"
+          className="primary-button"
+          onClick={() => setActiveScreen('inscripcion-documentos')}
+        >
+          Guardar y continuar
+        </button>
+      </footer>
     </div>
   )
 }
 
-function AlertsScreen() {
+function InscriptionDocumentsScreen({ setActiveScreen }) {
   return (
-    <div className="screen-grid">
-      <section className="section-heading">
-        <p className="eyebrow">Centro de alertas</p>
-        <h3>Mensajes priorizados y fáciles de entender</h3>
-      </section>
+    <div className="module">
+      <Stepper active={3} />
 
-      <div className="notification-list">
-        {notifications.map((notification) => (
-          <article className="notification-card" key={notification.title}>
-            <div>
-              <span className="notification-type">{notification.type}</span>
-              <h4>{notification.title}</h4>
-              <p>{notification.text}</p>
-            </div>
-            <time>{notification.time}</time>
-          </article>
-        ))}
+      <SectionHeader
+        kicker="Inscripción a convocatoria"
+        title="Paso 3: documentos"
+        description="Adjunte los documentos requeridos en formato PDF. El sistema indicará qué falta antes de continuar."
+      />
+
+      <div className="table-card">
+        <TableHeader title="Documentos solicitados" count="4 requeridos" />
+
+        <table>
+          <thead>
+            <tr>
+              <th>Documento</th>
+              <th>Tipo</th>
+              <th>Estado</th>
+              <th>Archivo cargado</th>
+              <th>Acción</th>
+            </tr>
+          </thead>
+
+          <tbody>
+            {documentRows.map((doc) => (
+              <tr key={doc.name}>
+                <td>
+                  <strong>{doc.name}</strong>
+                </td>
+                <td>{doc.type}</td>
+                <td>
+                  <Status text={doc.status} tone={doc.tone} />
+                </td>
+                <td>{doc.date}</td>
+                <td>
+                  <button type="button" className="table-action">
+                    Adjuntar
+                  </button>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
       </div>
 
-      <section className="preferences-card">
-        <h4>Preferencias de notificación</h4>
-        <div className="toggle-list">
-          <label>
-            <input type="checkbox" defaultChecked />
-            Recibir alertas de cierres próximos.
-          </label>
-          <label>
-            <input type="checkbox" defaultChecked />
-            Recibir cambios de estado de inscripción.
-          </label>
-          <label>
-            <input type="checkbox" />
-            Recibir nuevas convocatorias similares.
-          </label>
-        </div>
-      </section>
+      <footer className="screen-footer">
+        <button type="button" className="secondary-button">
+          Volver
+        </button>
+        <button
+          type="button"
+          className="primary-button"
+          onClick={() => setActiveScreen('revision-envio')}
+        >
+          Continuar revisión
+        </button>
+      </footer>
     </div>
   )
 }
 
-function HelpScreen() {
+function ReviewScreen({ setActiveScreen }) {
   return (
-    <div className="screen-grid">
-      <section className="section-heading">
-        <p className="eyebrow">Soporte ciudadano</p>
-        <h3>Ayuda clara, accesible y orientada a tareas</h3>
-        <p>
-          Esta pantalla centraliza preguntas frecuentes, accesibilidad y rutas de contacto.
-        </p>
-      </section>
+    <div className="module">
+      <Stepper active={4} />
 
-      <div className="help-grid">
-        <InfoBlock title="¿Cómo me inscribo?">
-          <p>Busca una convocatoria, revisa requisitos, completa tu hoja de vida y confirma.</p>
-        </InfoBlock>
+      <SectionHeader
+        kicker="Inscripción a convocatoria"
+        title="Paso 4: revisión y envío"
+        description="Revise el resumen de su postulación antes de enviarla."
+      />
 
-        <InfoBlock title="¿Qué documentos necesito?">
-          <p>Documento de identidad, soportes académicos, experiencia y certificaciones.</p>
-        </InfoBlock>
+      <div className="review-layout">
+        <section className="review-list">
+          <ReviewItem title="Información personal" status="Completa" tone="success" />
+          <ReviewItem title="Experiencia laboral" status="Completa" tone="success" />
+          <ReviewItem title="Formación académica" status="Completa" tone="success" />
+          <ReviewItem title="Documentos" status="1 pendiente" tone="warning" />
+        </section>
 
-        <InfoBlock title="¿Cómo consulto mi estado?">
-          <p>Entra a “Mis empleos” y revisa el avance de cada proceso guardado o inscrito.</p>
-        </InfoBlock>
+        <section className="summary-box">
+          <h3>Resumen de postulación</h3>
+          <p>Convocatoria seleccionada</p>
+          <strong>Analista III · OPEC 182654</strong>
 
-        <InfoBlock title="Accesibilidad">
-          <p>Incluye contraste alto, textos descriptivos, navegación por teclado y etiquetas claras.</p>
-        </InfoBlock>
+          <div className="summary-line">
+            <span>Progreso</span>
+            <strong>75%</strong>
+          </div>
+
+          <div className="progress-line">
+            <span style={{ width: '75%' }} />
+          </div>
+
+          <button
+            type="button"
+            className="primary-button full"
+            onClick={() => setActiveScreen('confirmacion')}
+          >
+            Enviar postulación
+          </button>
+        </section>
+      </div>
+    </div>
+  )
+}
+
+function ConfirmationScreen({ setActiveScreen }) {
+  return (
+    <div className="module centered-state">
+      <div className="success-icon">✓</div>
+      <Status text="Acción completada" tone="success" />
+      <h2>¡Postulación enviada con éxito!</h2>
+      <p>
+        Su inscripción fue recibida correctamente. Puede descargar el comprobante o revisar el
+        estado de su postulación.
+      </p>
+
+      <div className="confirmation-grid">
+        <InfoCard title="Convocatoria" text="Analista III · DIAN" />
+        <InfoCard title="Código OPEC" text="182654" />
+        <InfoCard title="Estado inicial" text="Inscripción recibida" />
       </div>
 
-      <section className="contact-card">
+      <div className="hero-actions">
+        <button type="button" className="secondary-button">
+          Descargar comprobante
+        </button>
+        <button
+          type="button"
+          className="primary-button"
+          onClick={() => setActiveScreen('detalle-postulacion')}
+        >
+          Ver detalle de postulación
+        </button>
+      </div>
+    </div>
+  )
+}
+
+function PostulationDetailScreen() {
+  return (
+    <div className="module">
+      <section className="detail-hero">
         <div>
-          <h4>¿No encontraste lo que necesitabas?</h4>
-          <p>El usuario puede recibir orientación sin salir del flujo principal.</p>
+          <Status text="Postulación en revisión" tone="warning" />
+          <h2>Detalle de postulación</h2>
+          <p>Analista III · DIAN · OPEC 182654</p>
         </div>
 
         <button type="button" className="primary-button">
-          Solicitar ayuda
+          Descargar comprobante
         </button>
       </section>
+
+      <div className="postulation-grid">
+        <section className="timeline-card">
+          <h3>Estado actual del proceso</h3>
+
+          <div className="timeline">
+            {postulationSteps.map((step) => (
+              <div className="timeline-item" key={step.label}>
+                <span className={`timeline-dot ${step.tone}`} />
+                <div>
+                  <strong>{step.label}</strong>
+                  <Status text={step.status} tone={step.tone} />
+                </div>
+              </div>
+            ))}
+          </div>
+        </section>
+
+        <section className="summary-box">
+          <h3>Documentos enviados</h3>
+          {documentRows.slice(0, 3).map((doc) => (
+            <div className="document-summary" key={doc.name}>
+              <span>{doc.name}</span>
+              <Status text={doc.status} tone={doc.tone} />
+            </div>
+          ))}
+        </section>
+      </div>
     </div>
   )
 }
 
-function MetricCard({ value, label }) {
+function DocumentsScreen() {
   return (
-    <article className="metric-card">
-      <strong>{value}</strong>
-      <span>{label}</span>
+    <div className="module">
+      <SectionHeader
+        kicker="Hoja de vida"
+        title="Documentos"
+        description="Consulte el estado de los documentos cargados y corrija los que requieran validación."
+      />
+
+      <div className="table-card">
+        <TableHeader title="Documentos del aspirante" count="4 documentos" />
+
+        <table>
+          <thead>
+            <tr>
+              <th>Documento</th>
+              <th>Categoría</th>
+              <th>Fecha de carga</th>
+              <th>Estado</th>
+              <th>Acciones</th>
+            </tr>
+          </thead>
+
+          <tbody>
+            {documentRows.map((doc) => (
+              <tr key={doc.name}>
+                <td>
+                  <strong>{doc.name}</strong>
+                </td>
+                <td>{doc.type}</td>
+                <td>{doc.date}</td>
+                <td>
+                  <Status text={doc.status} tone={doc.tone} />
+                </td>
+                <td>
+                  <button type="button" className="table-action">
+                    Ver
+                  </button>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  )
+}
+
+function ErrorValidationScreen({ setActiveScreen }) {
+  return (
+    <div className="module">
+      <Stepper active={3} error />
+
+      <section className="error-banner">
+        <div className="error-icon">!</div>
+        <div>
+          <h2>No pudimos completar esta acción</h2>
+          <p>
+            Hay documentos requeridos sin cargar o con información pendiente. Revise los elementos
+            marcados antes de continuar.
+          </p>
+        </div>
+      </section>
+
+      <div className="review-layout">
+        <section className="review-list">
+          <ReviewItem title="Documento de identidad" status="Validado" tone="success" />
+          <ReviewItem title="Diploma académico" status="Requiere revisión" tone="danger" />
+          <ReviewItem title="Certificado laboral" status="Validado" tone="success" />
+          <ReviewItem title="Tarjeta profesional" status="Pendiente" tone="danger" />
+        </section>
+
+        <section className="summary-box danger-box">
+          <h3>Resumen de validación</h3>
+
+          <div className="summary-line">
+            <span>Progreso</span>
+            <strong>50%</strong>
+          </div>
+
+          <div className="progress-line danger">
+            <span style={{ width: '50%' }} />
+          </div>
+
+          <p>
+            Corrija los documentos pendientes para habilitar el envío final de la postulación.
+          </p>
+
+          <button
+            type="button"
+            className="primary-button full"
+            onClick={() => setActiveScreen('inscripcion-documentos')}
+          >
+            Corregir documentos
+          </button>
+        </section>
+      </div>
+    </div>
+  )
+}
+
+function AssistPanel({ activeScreen, setActiveScreen }) {
+  const isInscription = activeScreen.includes('inscripcion') || activeScreen === 'revision-envio'
+  const progress = isInscription ? '75%' : '68%'
+
+  return (
+    <aside className="assist-panel">
+      <section className="mini-account">
+        <p>Mi cuenta</p>
+        <strong>Daniel Cuestas</strong>
+        <span>Perfil actualizado parcialmente</span>
+
+        <div className="progress-line">
+          <span style={{ width: progress }} />
+        </div>
+
+        <small>{progress} completado</small>
+      </section>
+
+      <section className="assist-card">
+        <h3>¿Necesita ayuda?</h3>
+        <p>Consulte una guía rápida sobre esta pantalla o revise los requisitos del proceso.</p>
+        <button type="button" className="secondary-button full">
+          Abrir ayuda
+        </button>
+      </section>
+
+      <section className="assist-card">
+        <h3>Consejos para este paso</h3>
+        <ul>
+          <li>Revise fechas y requisitos antes de enviar.</li>
+          <li>Use documentos legibles en formato PDF.</li>
+          <li>Guarde avances si necesita continuar después.</li>
+        </ul>
+      </section>
+
+      <section className="assist-card subtle">
+        <h3>Accesibilidad</h3>
+        <p>Textos claros, botones descriptivos y estados visibles para reducir incertidumbre.</p>
+        <button type="button" className="ghost-button full" onClick={() => setActiveScreen('inicio')}>
+          Volver al inicio
+        </button>
+      </section>
+    </aside>
+  )
+}
+
+function SectionHeader({ kicker, title, description, action, onAction }) {
+  return (
+    <header className="section-header">
+      <div>
+        <p>{kicker}</p>
+        <h2>{title}</h2>
+        {description && <span>{description}</span>}
+      </div>
+
+      {action && (
+        <button type="button" className="primary-button small" onClick={onAction}>
+          {action}
+        </button>
+      )}
+    </header>
+  )
+}
+
+function FilterStrip() {
+  return (
+    <section className="filter-strip">
+      <label>
+        Palabra clave
+        <input type="search" placeholder="Cargo, entidad o código OPEC" defaultValue="Analista" />
+      </label>
+
+      <label>
+        Ciudad
+        <select defaultValue="Cali">
+          <option>Cali</option>
+          <option>Bogotá D.C.</option>
+          <option>Palmira</option>
+          <option>Tuluá</option>
+        </select>
+      </label>
+
+      <label>
+        Nivel
+        <select defaultValue="Profesional">
+          <option>Profesional</option>
+          <option>Técnico</option>
+          <option>Asistencial</option>
+        </select>
+      </label>
+
+      <button type="button" className="primary-button">
+        Buscar
+      </button>
+    </section>
+  )
+}
+
+function FilterGroup({ title, values }) {
+  return (
+    <div className="filter-group">
+      <strong>{title}</strong>
+      {values.map((value) => (
+        <label key={value}>
+          <input type="checkbox" defaultChecked={value === values[0]} />
+          {value}
+        </label>
+      ))}
+    </div>
+  )
+}
+
+function JobMiniCard({ job, onClick }) {
+  return (
+    <article className="job-mini-card">
+      <div className="job-icon">{job.entity.slice(0, 2)}</div>
+
+      <div>
+        <Status text={job.status} tone={job.statusTone} />
+        <h3>{job.title}</h3>
+        <p>{job.entity}</p>
+        <small>{job.city} · {job.salary}</small>
+      </div>
+
+      <button type="button" className="table-action" onClick={onClick}>
+        Ver
+      </button>
     </article>
   )
 }
 
-function InsightCard({ title, text }) {
+function TableHeader({ title, count }) {
   return (
-    <article className="insight-card">
-      <h5>{title}</h5>
+    <div className="table-header">
+      <div>
+        <h3>{title}</h3>
+        <span>{count}</span>
+      </div>
+
+      <button type="button" className="secondary-button small">
+        Exportar
+      </button>
+    </div>
+  )
+}
+
+function StatCard({ label, value }) {
+  return (
+    <article className="stat-card">
+      <span>{label}</span>
+      <strong>{value}</strong>
+    </article>
+  )
+}
+
+function InfoCard({ title, text }) {
+  return (
+    <article className="info-card">
+      <h3>{title}</h3>
       <p>{text}</p>
     </article>
   )
 }
 
-function JobCard({ job, setActiveScreen }) {
+function QuickCard({ title, text, onClick }) {
   return (
-    <article className="job-card">
-      <div className="job-main">
-        <div className="job-code">{job.code}</div>
-        <h4>{job.title}</h4>
-        <p>{job.entity}</p>
-        <p className="muted">{job.city}</p>
+    <button type="button" className="quick-card" onClick={onClick}>
+      <strong>{title}</strong>
+      <span>{text}</span>
+    </button>
+  )
+}
 
-        <div className="tag-row">
-          {job.tags.map((tag) => (
-            <span key={tag}>{tag}</span>
-          ))}
-        </div>
+function Field({ label, value }) {
+  return (
+    <label className="field">
+      <span>{label}</span>
+      <input defaultValue={value} />
+    </label>
+  )
+}
+
+function Stepper({ active, error = false }) {
+  const steps = ['Información personal', 'Experiencia y estudios', 'Documentos', 'Revisión y envío']
+
+  return (
+    <div className={`stepper ${error ? 'has-error' : ''}`}>
+      {steps.map((step, index) => {
+        const number = index + 1
+        const isActive = number === active
+        const isDone = number < active
+
+        return (
+          <div
+            key={step}
+            className={`step ${isActive ? 'current' : ''} ${isDone ? 'done' : ''}`}
+          >
+            <span>{number}</span>
+            <p>{step}</p>
+          </div>
+        )
+      })}
+    </div>
+  )
+}
+
+function ReviewItem({ title, status, tone }) {
+  return (
+    <article className="review-item">
+      <div>
+        <strong>{title}</strong>
+        <span>Revise la información antes de continuar.</span>
       </div>
 
-      <div className="job-side">
-        <strong>{job.salary}</strong>
-        <span>{job.vacancies} vacantes</span>
-        <small>{job.deadline}</small>
-        <button type="button" className="primary-button" onClick={() => setActiveScreen('detalle')}>
-          Ver convocatoria
-        </button>
-      </div>
+      <Status text={status} tone={tone} />
     </article>
   )
 }
 
-function InfoBlock({ title, children }) {
-  return (
-    <article className="info-block">
-      <h4>{title}</h4>
-      {children}
-    </article>
-  )
+function Status({ text, tone = 'muted' }) {
+  return <span className={`status ${tone}`}>{text}</span>
 }
 
 export default App
