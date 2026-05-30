@@ -9,6 +9,7 @@ const menuGroups = [
       { id: 'convocatorias', label: 'Convocatorias' },
       { id: 'detalle-convocatoria', label: 'Detalle de convocatoria' },
       { id: 'entidades', label: 'Entidades' },
+      { id: 'detalle-entidad', label: 'Detalle de entidad' },
     ],
   },
   {
@@ -41,12 +42,19 @@ const menuGroups = [
 
 const allMenuItems = menuGroups.flatMap((group) => group.items)
 
+const screenTitles = {
+  login: { label: 'Iniciar sesión' },
+  registro: { label: 'Registro de usuario' },
+}
+
 const jobs = [
   {
     code: 'OPEC 182654',
     title: 'Analista III',
+    contest: 'Nación 6',
     entity: 'DIAN',
     level: 'Profesional',
+    formationLevel: 'Profesional universitario',
     city: 'Bogotá D.C.',
     vacancies: 5,
     salary: '$4.870.000',
@@ -56,8 +64,10 @@ const jobs = [
   {
     code: 'OPEC 194728',
     title: 'Profesional universitario',
+    contest: 'Territorial Valle',
     entity: 'Alcaldía de Cali',
     level: 'Profesional',
+    formationLevel: 'Profesional universitario',
     city: 'Cali',
     vacancies: 3,
     salary: '$4.250.000',
@@ -67,8 +77,10 @@ const jobs = [
   {
     code: 'OPEC 201245',
     title: 'Técnico administrativo',
+    contest: 'Territorial 11',
     entity: 'Gobernación del Valle',
     level: 'Técnico',
+    formationLevel: 'Técnico laboral',
     city: 'Palmira',
     vacancies: 8,
     salary: '$2.950.000',
@@ -78,13 +90,28 @@ const jobs = [
   {
     code: 'OPEC 217680',
     title: 'Auxiliar de archivo',
+    contest: 'Municipios priorizados',
     entity: 'Secretaría de Educación',
     level: 'Asistencial',
+    formationLevel: 'Bachiller',
     city: 'Tuluá',
     vacancies: 12,
     salary: '$1.980.000',
     status: 'Abierta',
     statusTone: 'success',
+  },
+  {
+    code: 'OPEC 167390',
+    title: 'Profesional especializado',
+    contest: 'Nación 4',
+    entity: 'Ministerio de Educación',
+    level: 'Profesional',
+    formationLevel: 'Especialización',
+    city: 'Bogotá D.C.',
+    vacancies: 2,
+    salary: '$6.120.000',
+    status: 'Finalizada',
+    statusTone: 'muted',
   },
 ]
 
@@ -92,26 +119,38 @@ const entities = [
   {
     name: 'Dirección de Impuestos y Aduanas Nacionales',
     short: 'DIAN',
+    matchKey: 'DIAN',
     type: 'Entidad nacional',
     city: 'Bogotá D.C.',
     jobs: 42,
     status: 'Convocatoria activa',
+    description:
+      'Entidad encargada de administrar obligaciones tributarias, aduaneras y cambiarias en Colombia.',
+    address: 'Cra. 8 # 6C - 38, Bogotá D.C.',
   },
   {
     name: 'Alcaldía de Santiago de Cali',
     short: 'CALI',
+    matchKey: 'Alcaldía de Cali',
     type: 'Entidad territorial',
     city: 'Cali',
     jobs: 18,
     status: 'Inscripciones abiertas',
+    description:
+      'Entidad territorial responsable de la gestión administrativa, social y urbana del municipio de Santiago de Cali.',
+    address: 'Centro Administrativo Municipal, Cali',
   },
   {
     name: 'Gobernación del Valle del Cauca',
     short: 'VALLE',
+    matchKey: 'Gobernación del Valle',
     type: 'Entidad departamental',
     city: 'Valle del Cauca',
     jobs: 24,
     status: 'En publicación',
+    description:
+      'Entidad departamental encargada de coordinar políticas públicas y servicios administrativos en el Valle del Cauca.',
+    address: 'Palacio de San Francisco, Cali',
   },
 ]
 
@@ -198,6 +237,13 @@ const documentRows = [
     status: 'Por cargar',
     tone: 'danger',
   },
+  {
+    name: 'Otros documentos',
+    type: 'Soporte adicional',
+    date: 'Pendiente',
+    status: 'Por cargar',
+    tone: 'danger',
+  },
 ]
 
 const postulationSteps = [
@@ -209,32 +255,61 @@ const postulationSteps = [
 
 function App() {
   const [activeScreen, setActiveScreen] = useState('inicio')
+  const [isLoggedIn, setIsLoggedIn] = useState(false)
+  const [selectedEntity, setSelectedEntity] = useState(entities[0])
+
+  const visibleMenuGroups = useMemo(() => {
+    if (isLoggedIn) return menuGroups
+    return menuGroups.filter((group) => group.title === 'Módulo público')
+  }, [isLoggedIn])
 
   const currentItem = useMemo(
-    () => allMenuItems.find((item) => item.id === activeScreen) ?? allMenuItems[0],
+    () =>
+      screenTitles[activeScreen] ??
+      allMenuItems.find((item) => item.id === activeScreen) ?? { label: 'Inicio' },
     [activeScreen],
   )
 
   return (
     <div className="simo-app">
-      <Sidebar activeScreen={activeScreen} setActiveScreen={setActiveScreen} />
+      <Sidebar
+        activeScreen={activeScreen}
+        setActiveScreen={setActiveScreen}
+        menuGroups={visibleMenuGroups}
+      />
 
       <main className="workspace">
-        <Topbar title={currentItem.label} />
+        <Topbar
+          title={currentItem.label}
+          isLoggedIn={isLoggedIn}
+          setIsLoggedIn={setIsLoggedIn}
+          setActiveScreen={setActiveScreen}
+        />
 
         <div className="workspace-grid">
           <section className="screen-card">
-            <ScreenRenderer activeScreen={activeScreen} setActiveScreen={setActiveScreen} />
+            <ScreenRenderer
+              activeScreen={activeScreen}
+              setActiveScreen={setActiveScreen}
+              isLoggedIn={isLoggedIn}
+              setIsLoggedIn={setIsLoggedIn}
+              selectedEntity={selectedEntity}
+              setSelectedEntity={setSelectedEntity}
+            />
           </section>
 
-          <AssistPanel activeScreen={activeScreen} setActiveScreen={setActiveScreen} />
+          <AssistPanel
+            activeScreen={activeScreen}
+            setActiveScreen={setActiveScreen}
+            isLoggedIn={isLoggedIn}
+          />
         </div>
       </main>
     </div>
   )
 }
 
-function Sidebar({ activeScreen, setActiveScreen }) {
+function Sidebar({ activeScreen, setActiveScreen, menuGroups }) {
   return (
     <aside className="sidebar">
       <div className="brand">
@@ -273,7 +348,12 @@ function Sidebar({ activeScreen, setActiveScreen }) {
   )
 }
 
-function Topbar({ title }) {
+function Topbar({ title, isLoggedIn, setIsLoggedIn, setActiveScreen }) {
+  const handleLogout = () => {
+    setIsLoggedIn(false)
+    setActiveScreen('inicio')
+  }
+
   return (
     <header className="topbar">
       <div>
@@ -282,37 +362,256 @@ function Topbar({ title }) {
       </div>
 
       <div className="top-actions">
-        <button type="button" className="ghost-button">
-          Alto contraste
-        </button>
-        <button type="button" className="primary-button">
-          Iniciar sesión
-        </button>
+        {isLoggedIn ? (
+          <>
+            <button type="button" className="ghost-button" onClick={() => setActiveScreen('perfil')}>
+              Mi cuenta
+            </button>
+            <button type="button" className="secondary-button" onClick={handleLogout}>
+              Cerrar sesión
+            </button>
+          </>
+        ) : (
+          <>
+            <button type="button" className="ghost-button" onClick={() => setActiveScreen('registro')}>
+              Registrarse
+            </button>
+            <button type="button" className="primary-button" onClick={() => setActiveScreen('login')}>
+              Iniciar sesión
+            </button>
+          </>
+        )}
       </div>
     </header>
   )
 }
 
-function ScreenRenderer({ activeScreen, setActiveScreen }) {
+function ScreenRenderer({
+  activeScreen,
+  setActiveScreen,
+  isLoggedIn,
+  setIsLoggedIn,
+  selectedEntity,
+  setSelectedEntity,
+}) {
+  const privateProps = { isLoggedIn, setActiveScreen }
+
   const screens = {
     inicio: <HomeScreen setActiveScreen={setActiveScreen} />,
     convocatorias: <JobsScreen setActiveScreen={setActiveScreen} />,
-    'detalle-convocatoria': <JobDetailScreen setActiveScreen={setActiveScreen} />,
-    entidades: <EntitiesScreen />,
-    perfil: <ProfileScreen setActiveScreen={setActiveScreen} />,
-    'datos-personales': <PersonalDataScreen />,
-    experiencia: <ExperienceScreen />,
-    estudios: <StudiesScreen />,
-    'inscripcion-datos': <InscriptionDataScreen setActiveScreen={setActiveScreen} />,
-    'inscripcion-documentos': <InscriptionDocumentsScreen setActiveScreen={setActiveScreen} />,
-    'revision-envio': <ReviewScreen setActiveScreen={setActiveScreen} />,
-    confirmacion: <ConfirmationScreen setActiveScreen={setActiveScreen} />,
-    'detalle-postulacion': <PostulationDetailScreen />,
-    documentos: <DocumentsScreen />,
-    'error-validacion': <ErrorValidationScreen setActiveScreen={setActiveScreen} />,
+    'detalle-convocatoria': (
+      <JobDetailScreen
+        setActiveScreen={setActiveScreen}
+        isLoggedIn={isLoggedIn}
+      />
+    ),
+    entidades: (
+      <EntitiesScreen
+        setActiveScreen={setActiveScreen}
+        setSelectedEntity={setSelectedEntity}
+      />
+    ),
+    'detalle-entidad': (
+      <EntityDetailScreen
+        selectedEntity={selectedEntity}
+        setActiveScreen={setActiveScreen}
+      />
+    ),
+    login: (
+      <LoginScreen
+        setIsLoggedIn={setIsLoggedIn}
+        setActiveScreen={setActiveScreen}
+      />
+    ),
+    registro: (
+      <RegisterScreen
+        setIsLoggedIn={setIsLoggedIn}
+        setActiveScreen={setActiveScreen}
+      />
+    ),
+    perfil: (
+      <PrivateGuard {...privateProps}>
+        <ProfileScreen setActiveScreen={setActiveScreen} />
+      </PrivateGuard>
+    ),
+    'datos-personales': (
+      <PrivateGuard {...privateProps}>
+        <PersonalDataScreen />
+      </PrivateGuard>
+    ),
+    experiencia: (
+      <PrivateGuard {...privateProps}>
+        <ExperienceScreen />
+      </PrivateGuard>
+    ),
+    estudios: (
+      <PrivateGuard {...privateProps}>
+        <StudiesScreen />
+      </PrivateGuard>
+    ),
+    'inscripcion-datos': (
+      <PrivateGuard {...privateProps}>
+        <InscriptionDataScreen setActiveScreen={setActiveScreen} />
+      </PrivateGuard>
+    ),
+    'inscripcion-documentos': (
+      <PrivateGuard {...privateProps}>
+        <InscriptionDocumentsScreen setActiveScreen={setActiveScreen} />
+      </PrivateGuard>
+    ),
+    'revision-envio': (
+      <PrivateGuard {...privateProps}>
+        <ReviewScreen setActiveScreen={setActiveScreen} />
+      </PrivateGuard>
+    ),
+    confirmacion: (
+      <PrivateGuard {...privateProps}>
+        <ConfirmationScreen setActiveScreen={setActiveScreen} />
+      </PrivateGuard>
+    ),
+    'detalle-postulacion': (
+      <PrivateGuard {...privateProps}>
+        <PostulationDetailScreen />
+      </PrivateGuard>
+    ),
+    documentos: (
+      <PrivateGuard {...privateProps}>
+        <DocumentsScreen />
+      </PrivateGuard>
+    ),
+    'error-validacion': (
+      <PrivateGuard {...privateProps}>
+        <ErrorValidationScreen setActiveScreen={setActiveScreen} />
+      </PrivateGuard>
+    ),
   }
 
   return screens[activeScreen] ?? screens.inicio
+}
+
+function PrivateGuard({ isLoggedIn, setActiveScreen, children }) {
+  if (isLoggedIn) return children
+
+  return (
+    <LoginRequiredScreen setActiveScreen={setActiveScreen} />
+  )
+}
+
+function LoginRequiredScreen({ setActiveScreen }) {
+  return (
+    <div className="module private-message">
+      <Status text="Acceso requerido" tone="warning" />
+      <h2>Debe iniciar sesión para continuar</h2>
+      <p>
+        Esta sección contiene información privada de la cuenta, inscripciones, documentos y estados
+        de postulación. Inicie sesión o cree una cuenta para ver estos datos.
+      </p>
+
+      <div className="hero-actions">
+        <button type="button" className="primary-button" onClick={() => setActiveScreen('login')}>
+          Iniciar sesión
+        </button>
+        <button type="button" className="secondary-button" onClick={() => setActiveScreen('registro')}>
+          Registrarse
+        </button>
+      </div>
+    </div>
+  )
+}
+
+function LoginScreen({ setIsLoggedIn, setActiveScreen }) {
+  const handleLogin = () => {
+    setIsLoggedIn(true)
+    setActiveScreen('perfil')
+  }
+
+  return (
+    <div className="module">
+      <section className="auth-layout">
+        <div className="auth-card">
+          <Status text="Acceso seguro" tone="info" />
+          <h2>Iniciar sesión</h2>
+          <p>
+            Ingrese con su correo y contraseña para consultar su perfil, documentos,
+            inscripciones y estados de postulación.
+          </p>
+
+          <div className="auth-form">
+            <Field label="Correo electrónico" value="daniel.cuestas@correounivalle.edu.co" />
+            <label className="field">
+              <span>Contraseña</span>
+              <input type="password" defaultValue="12345678" />
+            </label>
+
+            <button type="button" className="primary-button full" onClick={handleLogin}>
+              Entrar a mi cuenta
+            </button>
+
+            <button type="button" className="inline-link" onClick={() => setActiveScreen('registro')}>
+              No tengo cuenta, registrarme
+            </button>
+          </div>
+        </div>
+
+        <div className="auth-side">
+          <h3>Al iniciar sesión podrá:</h3>
+          <ul>
+            <li>Consultar su hoja de vida.</li>
+            <li>Guardar convocatorias de interés.</li>
+            <li>Iniciar una inscripción.</li>
+            <li>Revisar documentos y estados críticos.</li>
+          </ul>
+        </div>
+      </section>
+    </div>
+  )
+}
+
+function RegisterScreen({ setIsLoggedIn, setActiveScreen }) {
+  const handleRegister = () => {
+    setIsLoggedIn(true)
+    setActiveScreen('perfil')
+  }
+
+  return (
+    <div className="module">
+      <section className="auth-layout">
+        <div className="auth-card">
+          <Status text="Nuevo usuario" tone="success" />
+          <h2>Crear cuenta</h2>
+          <p>
+            Complete los datos básicos para habilitar su perfil y comenzar a gestionar
+            convocatorias e inscripciones.
+          </p>
+
+          <div className="auth-form">
+            <div className="form-grid two">
+              <Field label="Nombres" value="Daniel José" />
+              <Field label="Apellidos" value="Cuestas Parada" />
+              <Field label="Correo electrónico" value="daniel.cuestas@correounivalle.edu.co" />
+              <Field label="Documento" value="1.234.567.890" />
+            </div>
+
+            <button type="button" className="primary-button full" onClick={handleRegister}>
+              Crear cuenta y continuar
+            </button>
+
+            <button type="button" className="inline-link" onClick={() => setActiveScreen('login')}>
+              Ya tengo cuenta, iniciar sesión
+            </button>
+          </div>
+        </div>
+
+        <div className="auth-side">
+          <h3>Registro guiado</h3>
+          <p>
+            La propuesta evita pedir toda la hoja de vida al inicio. Primero se crea la cuenta y
+            luego se completa el perfil por secciones.
+          </p>
+        </div>
+      </section>
+    </div>
+  )
 }
 
 function HomeScreen({ setActiveScreen }) {
@@ -325,8 +624,9 @@ function HomeScreen({ setActiveScreen }) {
             Encuentre su próxima oportunidad en el <strong>empleo público</strong>
           </h2>
           <p>
-            Busque por cargo, entidad, ciudad o código OPEC. La experiencia está organizada para
-            que comprenda requisitos, fechas y próximos pasos sin perder el contexto.
+            Busque por cargo, entidad, ciudad, código OPEC, concurso o nivel de formación. La
+            experiencia está organizada para que comprenda requisitos, fechas y próximos pasos sin
+            perder el contexto.
           </p>
 
           <div className="hero-actions">
@@ -354,7 +654,7 @@ function HomeScreen({ setActiveScreen }) {
         </div>
       </section>
 
-      <FilterStrip />
+      <FilterStrip extended />
 
       <section className="section-block">
         <SectionHeader
@@ -366,7 +666,11 @@ function HomeScreen({ setActiveScreen }) {
 
         <div className="compact-cards">
           {jobs.slice(0, 3).map((job) => (
-            <JobMiniCard key={job.code} job={job} onClick={() => setActiveScreen('detalle-convocatoria')} />
+            <JobMiniCard
+              key={job.code}
+              job={job}
+              onClick={() => setActiveScreen('detalle-convocatoria')}
+            />
           ))}
         </div>
       </section>
@@ -380,7 +684,7 @@ function JobsScreen({ setActiveScreen }) {
       <SectionHeader
         kicker="Búsqueda de oportunidades"
         title="Convocatorias disponibles"
-        description="Filtre los resultados por ubicación, nivel, entidad o palabra clave."
+        description="Filtre los resultados por ubicación, nivel, entidad, estado, concurso o código OPEC."
       />
 
       <FilterStrip />
@@ -391,17 +695,19 @@ function JobsScreen({ setActiveScreen }) {
 
           <FilterGroup title="Nivel jerárquico" values={['Profesional', 'Técnico', 'Asistencial']} />
           <FilterGroup title="Ciudad" values={['Bogotá D.C.', 'Cali', 'Palmira', 'Tuluá']} />
-          <FilterGroup title="Estado" values={['Abierta', 'Próxima a cerrar']} />
+          <FilterGroup title="Estado" values={['Abierta', 'Próxima a cerrar', 'Finalizada']} />
+          <FilterGroup title="Entidad" values={['DIAN', 'Alcaldía de Cali', 'Gobernación del Valle']} />
         </aside>
 
         <div className="table-card">
-          <TableHeader title="Resultados encontrados" count="4 convocatorias" />
+          <TableHeader title="Resultados encontrados" count={`${jobs.length} convocatorias`} />
 
           <table>
             <thead>
               <tr>
                 <th>Código</th>
                 <th>Empleo</th>
+                <th>Concurso</th>
                 <th>Entidad</th>
                 <th>Nivel</th>
                 <th>Vacantes</th>
@@ -418,6 +724,7 @@ function JobsScreen({ setActiveScreen }) {
                     <strong>{job.title}</strong>
                     <small>{job.city}</small>
                   </td>
+                  <td>{job.contest}</td>
                   <td>{job.entity}</td>
                   <td>{job.level}</td>
                   <td>{job.vacancies}</td>
@@ -443,7 +750,11 @@ function JobsScreen({ setActiveScreen }) {
   )
 }
 
-function JobDetailScreen({ setActiveScreen }) {
+function JobDetailScreen({ setActiveScreen, isLoggedIn }) {
+  const handleStartInscription = () => {
+    setActiveScreen(isLoggedIn ? 'inscripcion-datos' : 'login')
+  }
+
   return (
     <div className="module">
       <section className="detail-hero">
@@ -457,7 +768,7 @@ function JobDetailScreen({ setActiveScreen }) {
           <button
             type="button"
             className="primary-button"
-            onClick={() => setActiveScreen('inscripcion-datos')}
+            onClick={handleStartInscription}
           >
             Iniciar inscripción
           </button>
@@ -475,9 +786,7 @@ function JobDetailScreen({ setActiveScreen }) {
       </div>
 
       <div className="tab-strip">
-        <button type="button" className="selected">
-          Resumen
-        </button>
+        <button type="button" className="selected">Resumen</button>
         <button type="button">Requisitos</button>
         <button type="button">Funciones</button>
         <button type="button">Documentos solicitados</button>
@@ -502,7 +811,12 @@ function JobDetailScreen({ setActiveScreen }) {
   )
 }
 
-function EntitiesScreen() {
+function EntitiesScreen({ setActiveScreen, setSelectedEntity }) {
+  const handleEntityClick = (entity) => {
+    setSelectedEntity(entity)
+    setActiveScreen('detalle-entidad')
+  }
+
   return (
     <div className="module">
       <SectionHeader
@@ -514,7 +828,7 @@ function EntitiesScreen() {
       <FilterStrip />
 
       <div className="table-card">
-        <TableHeader title="Entidades registradas" count="3 entidades" />
+        <TableHeader title="Entidades registradas" count={`${entities.length} entidades`} />
 
         <table>
           <thead>
@@ -524,6 +838,7 @@ function EntitiesScreen() {
               <th>Ubicación</th>
               <th>Convocatorias</th>
               <th>Estado</th>
+              <th />
             </tr>
           </thead>
 
@@ -545,11 +860,84 @@ function EntitiesScreen() {
                 <td>
                   <Status text={entity.status} tone="success" />
                 </td>
+                <td>
+                  <button
+                    type="button"
+                    className="table-action"
+                    onClick={() => handleEntityClick(entity)}
+                  >
+                    Ver entidad
+                  </button>
+                </td>
               </tr>
             ))}
           </tbody>
         </table>
       </div>
+    </div>
+  )
+}
+
+function EntityDetailScreen({ selectedEntity, setActiveScreen }) {
+  const entityJobs = jobs.filter((job) => job.entity === selectedEntity.matchKey)
+  const visibleJobs = entityJobs.length > 0 ? entityJobs : jobs.slice(0, 2)
+
+  return (
+    <div className="module">
+      <section className="entity-detail-hero">
+        <div className="entity-logo">{selectedEntity.short}</div>
+
+        <div>
+          <Status text={selectedEntity.status} tone="success" />
+          <h2>{selectedEntity.name}</h2>
+          <p>{selectedEntity.description}</p>
+        </div>
+
+        <button
+          type="button"
+          className="secondary-button"
+          onClick={() => setActiveScreen('entidades')}
+        >
+          Volver a entidades
+        </button>
+      </section>
+
+      <div className="detail-stats">
+        <StatCard label="Tipo" value={selectedEntity.type} />
+        <StatCard label="Ubicación" value={selectedEntity.city} />
+        <StatCard label="Convocatorias" value={selectedEntity.jobs} />
+        <StatCard label="Dirección" value="Disponible" />
+      </div>
+
+      <div className="entity-summary-grid">
+        <InfoCard
+          title="Información institucional"
+          text={`Dirección principal: ${selectedEntity.address}. Esta vista permite consultar la entidad antes de revisar o iniciar una inscripción.`}
+        />
+        <InfoCard
+          title="Transparencia del proceso"
+          text="Se muestran oportunidades asociadas, estado de convocatoria y datos básicos para que el usuario entienda el contexto institucional."
+        />
+      </div>
+
+      <section className="section-block">
+        <SectionHeader
+          kicker="Oportunidades asociadas"
+          title="Convocatorias de la entidad"
+          action="Ver convocatorias"
+          onAction={() => setActiveScreen('convocatorias')}
+        />
+
+        <div className="compact-cards">
+          {visibleJobs.map((job) => (
+            <JobMiniCard
+              key={job.code}
+              job={job}
+              onClick={() => setActiveScreen('detalle-convocatoria')}
+            />
+          ))}
+        </div>
+      </section>
     </div>
   )
 }
@@ -584,7 +972,7 @@ function ProfileScreen({ setActiveScreen }) {
         <StatCard label="Completitud" value="68%" />
         <StatCard label="Experiencias" value="3" />
         <StatCard label="Estudios" value="3" />
-        <StatCard label="Documentos" value="4" />
+        <StatCard label="Documentos" value="5" />
       </div>
 
       <section className="section-block">
@@ -605,6 +993,11 @@ function ProfileScreen({ setActiveScreen }) {
             title="Estudios"
             text="Revise formación académica y soportes."
             onClick={() => setActiveScreen('estudios')}
+          />
+          <QuickCard
+            title="Otros documentos"
+            text="Cargue soportes adicionales, tarjetas, certificaciones o anexos."
+            onClick={() => setActiveScreen('documentos')}
           />
         </div>
       </section>
@@ -811,7 +1204,7 @@ function InscriptionDocumentsScreen({ setActiveScreen }) {
       />
 
       <div className="table-card">
-        <TableHeader title="Documentos solicitados" count="4 requeridos" />
+        <TableHeader title="Documentos solicitados" count={`${documentRows.length} requeridos`} />
 
         <table>
           <thead>
@@ -997,7 +1390,7 @@ function DocumentsScreen() {
       />
 
       <div className="table-card">
-        <TableHeader title="Documentos del aspirante" count="4 documentos" />
+        <TableHeader title="Documentos del aspirante" count={`${documentRows.length} documentos`} />
 
         <table>
           <thead>
@@ -1088,23 +1481,38 @@ function ErrorValidationScreen({ setActiveScreen }) {
   )
 }
 
-function AssistPanel({ activeScreen, setActiveScreen }) {
+function AssistPanel({ activeScreen, setActiveScreen, isLoggedIn }) {
   const isInscription = activeScreen.includes('inscripcion') || activeScreen === 'revision-envio'
   const progress = isInscription ? '75%' : '68%'
 
   return (
     <aside className="assist-panel">
-      <section className="mini-account">
-        <p>Mi cuenta</p>
-        <strong>Daniel Cuestas</strong>
-        <span>Perfil actualizado parcialmente</span>
+      {isLoggedIn && (
+        <section className="mini-account">
+          <p>Mi cuenta</p>
+          <strong>Daniel Cuestas</strong>
+          <span>Perfil actualizado parcialmente</span>
 
-        <div className="progress-line">
-          <span style={{ width: progress }} />
-        </div>
+          <div className="progress-line">
+            <span style={{ width: progress }} />
+          </div>
 
-        <small>{progress} completado</small>
-      </section>
+          <small>{progress} completado</small>
+        </section>
+      )}
+
+      {!isLoggedIn && (
+        <section className="assist-card">
+          <h3>Acceso ciudadano</h3>
+          <p>
+            Puede explorar convocatorias y entidades sin iniciar sesión. Para inscribirse o ver su
+            información personal, debe acceder a su cuenta.
+          </p>
+          <button type="button" className="primary-button full" onClick={() => setActiveScreen('login')}>
+            Iniciar sesión
+          </button>
+        </section>
+      )}
 
       <section className="assist-card">
         <h3>¿Necesita ayuda?</h3>
@@ -1152,12 +1560,57 @@ function SectionHeader({ kicker, title, description, action, onAction }) {
   )
 }
 
-function FilterStrip() {
+function FilterStrip({ extended = false }) {
   return (
-    <section className="filter-strip">
+    <section className={`filter-strip ${extended ? 'extended' : ''}`}>
       <label>
         Palabra clave
         <input type="search" placeholder="Cargo, entidad o código OPEC" defaultValue="Analista" />
+      </label>
+
+      <label>
+        Código OPEC
+        <input type="search" placeholder="Ej: 182654" defaultValue="182654" />
+      </label>
+
+      <label>
+        Concurso
+        <select defaultValue="Nación 6">
+          <option>Nación 6</option>
+          <option>Territorial Valle</option>
+          <option>Territorial 11</option>
+          <option>Municipios priorizados</option>
+        </select>
+      </label>
+
+      <label>
+        Entidad
+        <select defaultValue="DIAN">
+          <option>DIAN</option>
+          <option>Alcaldía de Cali</option>
+          <option>Gobernación del Valle</option>
+          <option>Secretaría de Educación</option>
+        </select>
+      </label>
+
+      <label>
+        Estado del concurso
+        <select defaultValue="Abierta">
+          <option>Abierta</option>
+          <option>Próxima a cerrar</option>
+          <option>Finalizada</option>
+        </select>
+      </label>
+
+      <label>
+        Nivel de formación
+        <select defaultValue="Profesional">
+          <option>Bachiller</option>
+          <option>Técnico</option>
+          <option>Tecnólogo</option>
+          <option>Profesional</option>
+          <option>Especialización</option>
+        </select>
       </label>
 
       <label>
@@ -1167,15 +1620,6 @@ function FilterStrip() {
           <option>Bogotá D.C.</option>
           <option>Palmira</option>
           <option>Tuluá</option>
-        </select>
-      </label>
-
-      <label>
-        Nivel
-        <select defaultValue="Profesional">
-          <option>Profesional</option>
-          <option>Técnico</option>
-          <option>Asistencial</option>
         </select>
       </label>
 
@@ -1209,7 +1653,7 @@ function JobMiniCard({ job, onClick }) {
         <Status text={job.status} tone={job.statusTone} />
         <h3>{job.title}</h3>
         <p>{job.entity}</p>
-        <small>{job.city} · {job.salary}</small>
+        <small>{job.code} · {job.city} · {job.salary}</small>
       </div>
 
       <button type="button" className="table-action" onClick={onClick}>

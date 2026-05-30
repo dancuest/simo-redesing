@@ -303,13 +303,21 @@
 
 .filter-strip {
   display: grid;
-  grid-template-columns: minmax(190px, 1fr) 160px 160px auto;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
   gap: 10px;
   align-items: end;
   padding: 14px;
   border: 1px solid #e4eaf4;
   border-radius: 14px;
   background: #f8faff;
+}
+
+.filter-strip.extended {
+  grid-template-columns: repeat(auto-fit, minmax(145px, 1fr));
+}
+
+.filter-strip button {
+  align-self: end;
 }
 
 .filter-strip label,
@@ -375,6 +383,14 @@ button {
   border: 1px solid #dbe3ef;
 }
 
+.inline-link {
+  border: 0;
+  background: transparent;
+  color: #0b55c6;
+  font-weight: 850;
+  cursor: pointer;
+}
+
 .table-action {
   min-height: 32px;
   background: #eff5ff;
@@ -403,7 +419,9 @@ button {
 .job-mini-card,
 .review-item,
 .assist-card,
-.mini-account {
+.mini-account,
+.auth-card,
+.auth-side {
   border: 1px solid #e4eaf4;
   border-radius: 14px;
   background: #ffffff;
@@ -449,7 +467,8 @@ button {
 .quick-grid,
 .detail-stats,
 .detail-grid,
-.confirmation-grid {
+.confirmation-grid,
+.entity-summary-grid {
   display: grid;
   gap: 12px;
 }
@@ -469,7 +488,8 @@ button {
 }
 
 .job-icon,
-.entity-cell span {
+.entity-cell span,
+.entity-logo {
   width: 42px;
   height: 42px;
   display: grid;
@@ -650,7 +670,8 @@ td small {
 
 .detail-hero,
 .profile-hero,
-.error-banner {
+.error-banner,
+.entity-detail-hero {
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -664,7 +685,8 @@ td small {
 
 .detail-hero h2,
 .profile-hero h2,
-.error-banner h2 {
+.error-banner h2,
+.entity-detail-hero h2 {
   margin: 9px 0 4px;
   color: #17223a;
   font-size: 27px;
@@ -673,10 +695,23 @@ td small {
 
 .detail-hero p,
 .profile-hero p,
-.error-banner p {
+.error-banner p,
+.entity-detail-hero p {
   margin: 0;
   color: #68758b;
   font-size: 13px;
+}
+
+.entity-logo {
+  width: 68px;
+  height: 68px;
+  flex: 0 0 auto;
+  border-radius: 18px;
+  font-size: 15px;
+}
+
+.entity-summary-grid {
+  grid-template-columns: repeat(2, 1fr);
 }
 
 .detail-stats {
@@ -786,7 +821,7 @@ td small {
 }
 
 .quick-grid {
-  grid-template-columns: repeat(3, 1fr);
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
   margin-top: 14px;
 }
 
@@ -799,6 +834,11 @@ td small {
   background: #fbfcff;
   text-align: left;
   cursor: pointer;
+}
+
+.quick-card:hover {
+  border-color: #bcd4f7;
+  background: #f7fbff;
 }
 
 .quick-card strong {
@@ -832,6 +872,10 @@ td small {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
   gap: 12px;
+}
+
+.form-grid.two {
+  grid-template-columns: repeat(2, 1fr);
 }
 
 .field span {
@@ -1187,6 +1231,62 @@ td small {
   padding-left: 18px;
 }
 
+.auth-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 300px;
+  gap: 16px;
+}
+
+.auth-card,
+.auth-side {
+  padding: 22px;
+  background: #fbfcff;
+}
+
+.auth-card h2,
+.private-message h2 {
+  margin: 10px 0 8px;
+  color: #17223a;
+  font-size: 30px;
+  letter-spacing: -0.05em;
+}
+
+.auth-card p,
+.auth-side p,
+.private-message p {
+  margin: 0;
+  color: #68758b;
+  font-size: 14px;
+  line-height: 1.55;
+}
+
+.auth-form {
+  display: grid;
+  gap: 14px;
+  margin-top: 18px;
+}
+
+.auth-side h3 {
+  margin: 0 0 12px;
+  color: #17223a;
+  font-size: 16px;
+}
+
+.auth-side ul {
+  display: grid;
+  gap: 10px;
+  margin: 0;
+  padding-left: 18px;
+  color: #68758b;
+  font-size: 13px;
+}
+
+.private-message {
+  justify-items: start;
+  max-width: 720px;
+  padding: 34px;
+}
+
 @media (max-width: 1180px) {
   .simo-app {
     grid-template-columns: 1fr;
@@ -1205,7 +1305,8 @@ td small {
   .public-hero,
   .data-layout,
   .review-layout,
-  .postulation-grid {
+  .postulation-grid,
+  .auth-layout {
     grid-template-columns: 1fr;
   }
 
@@ -1215,8 +1316,8 @@ td small {
 
   .compact-cards,
   .detail-grid,
-  .quick-grid,
-  .confirmation-grid {
+  .confirmation-grid,
+  .entity-summary-grid {
     grid-template-columns: 1fr;
   }
 }
@@ -1231,15 +1332,18 @@ td small {
   .detail-hero,
   .profile-hero,
   .section-header,
-  .review-item {
+  .review-item,
+  .entity-detail-hero {
     align-items: stretch;
     flex-direction: column;
   }
 
   .side-nav,
   .filter-strip,
+  .filter-strip.extended,
   .detail-stats,
   .form-grid,
+  .form-grid.two,
   .stepper {
     grid-template-columns: 1fr;
   }
@@ -1261,7 +1365,7 @@ td small {
   }
 
   table {
-    min-width: 760px;
+    min-width: 860px;
   }
 
   .table-card {
