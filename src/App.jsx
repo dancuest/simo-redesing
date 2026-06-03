@@ -25,6 +25,7 @@ const menuGroups = [
     title: 'Inscripción',
     items: [
       { id: 'inscripcion-datos', label: 'Paso 1: información' },
+      { id: 'inscripcion-soportes', label: 'Paso 2: experiencia y estudios' },
       { id: 'inscripcion-documentos', label: 'Paso 3: documentos' },
       { id: 'revision-envio', label: 'Paso 4: revisión' },
       { id: 'confirmacion', label: 'Confirmación' },
@@ -452,6 +453,11 @@ function ScreenRenderer({
     'inscripcion-datos': (
       <PrivateGuard {...privateProps}>
         <InscriptionDataScreen setActiveScreen={setActiveScreen} />
+      </PrivateGuard>
+    ),
+    'inscripcion-soportes': (
+      <PrivateGuard {...privateProps}>
+        <InscriptionSupportsScreen setActiveScreen={setActiveScreen} />
       </PrivateGuard>
     ),
     'inscripcion-documentos': (
@@ -1179,6 +1185,120 @@ function InscriptionDataScreen({ setActiveScreen }) {
       <footer className="screen-footer">
         <button type="button" className="secondary-button">
           Guardar borrador
+        </button>
+        <button
+          type="button"
+          className="primary-button"
+          onClick={() => setActiveScreen('inscripcion-soportes')}
+        >
+          Guardar y continuar
+        </button>
+      </footer>
+    </div>
+  )
+}
+
+
+function InscriptionSupportsScreen({ setActiveScreen }) {
+  return (
+    <div className="module">
+      <Stepper active={2} />
+
+      <SectionHeader
+        kicker="Inscripción a convocatoria"
+        title="Paso 2: experiencia y estudios"
+        description="Seleccione la experiencia laboral y la formación académica que desea asociar a esta postulación. Adjunte los soportes correspondientes antes de continuar."
+      />
+
+      <div className="support-grid">
+        <section className="support-card">
+          <div className="support-card-header">
+            <div>
+              <h3>Experiencia relacionada</h3>
+              <p>Asocie certificados laborales que respalden su experiencia para esta convocatoria.</p>
+            </div>
+            <Status text="3 registros" tone="success" />
+          </div>
+
+          <div className="support-list">
+            {experienceRows.map((row) => (
+              <article className="support-row" key={row.company}>
+                <div className="support-main">
+                  <strong>{row.company}</strong>
+                  <span>{row.role}</span>
+                  <small>
+                    {row.period} · {row.city}
+                  </small>
+                </div>
+
+                <div className="support-actions">
+                  <Status text={row.status} tone={row.tone} />
+                  <button type="button" className="table-action">
+                    Adjuntar soporte
+                  </button>
+                </div>
+              </article>
+            ))}
+          </div>
+        </section>
+
+        <section className="support-card">
+          <div className="support-card-header">
+            <div>
+              <h3>Formación académica</h3>
+              <p>Asocie diplomas, actas de grado o certificados académicos relacionados.</p>
+            </div>
+            <Status text="3 registros" tone="info" />
+          </div>
+
+          <div className="support-list">
+            {studiesRows.map((row) => (
+              <article className="support-row" key={row.program}>
+                <div className="support-main">
+                  <strong>{row.program}</strong>
+                  <span>{row.institution}</span>
+                  <small>
+                    {row.level} · {row.year}
+                  </small>
+                </div>
+
+                <div className="support-actions">
+                  <Status text={row.status} tone={row.tone} />
+                  <button type="button" className="table-action">
+                    Adjuntar soporte
+                  </button>
+                </div>
+              </article>
+            ))}
+          </div>
+        </section>
+      </div>
+
+      <section className="support-summary">
+        <div>
+          <Status text="Validación previa" tone="warning" />
+          <h3>Resumen del paso 2</h3>
+          <p>
+            Antes de cargar documentos generales, el sistema permite asociar experiencia y estudios
+            con sus soportes. Esto ayuda a evitar errores de postulación y mejora la trazabilidad de
+            los requisitos.
+          </p>
+        </div>
+
+        <div className="support-summary-data">
+          <StatCard label="Experiencias asociadas" value="3" />
+          <StatCard label="Estudios asociados" value="3" />
+          <StatCard label="Soportes pendientes" value="1" />
+        </div>
+      </section>
+
+      <footer className="screen-footer">
+        <button
+          type="button"
+          className="secondary-button"
+          onClick={() => setActiveScreen('inscripcion-datos')}
+        >
+          Volver
         </button>
         <button
           type="button"

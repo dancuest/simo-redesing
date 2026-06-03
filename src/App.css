@@ -1287,6 +1287,115 @@ td small {
   padding: 34px;
 }
 
+
+.support-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 14px;
+}
+
+.support-card,
+.support-summary {
+  border: 1px solid #e4eaf4;
+  border-radius: 14px;
+  background: #fbfcff;
+}
+
+.support-card {
+  display: grid;
+  gap: 14px;
+  padding: 16px;
+}
+
+.support-card-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.support-card-header h3 {
+  margin: 0 0 5px;
+  color: #17223a;
+  font-size: 16px;
+}
+
+.support-card-header p {
+  margin: 0;
+  color: #68758b;
+  font-size: 12px;
+  line-height: 1.45;
+}
+
+.support-list {
+  display: grid;
+  gap: 10px;
+}
+
+.support-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 12px;
+  align-items: center;
+  border: 1px solid #e4eaf4;
+  border-radius: 12px;
+  padding: 12px;
+  background: #ffffff;
+}
+
+.support-main strong {
+  display: block;
+  color: #17223a;
+  font-size: 13px;
+}
+
+.support-main span {
+  display: block;
+  margin-top: 4px;
+  color: #596579;
+  font-size: 12px;
+}
+
+.support-main small {
+  display: block;
+  margin-top: 4px;
+  color: #8b95a8;
+  font-size: 11px;
+}
+
+.support-actions {
+  display: grid;
+  justify-items: end;
+  gap: 8px;
+}
+
+.support-summary {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 360px;
+  gap: 16px;
+  align-items: center;
+  padding: 16px;
+}
+
+.support-summary h3 {
+  margin: 8px 0 6px;
+  color: #17223a;
+  font-size: 17px;
+}
+
+.support-summary p {
+  margin: 0;
+  color: #68758b;
+  font-size: 13px;
+  line-height: 1.55;
+}
+
+.support-summary-data {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+}
+
 @media (max-width: 1180px) {
   .simo-app {
     grid-template-columns: 1fr;
@@ -1306,7 +1415,13 @@ td small {
   .data-layout,
   .review-layout,
   .postulation-grid,
-  .auth-layout {
+  .auth-layout,
+  .support-grid,
+  .support-summary {
+    grid-template-columns: 1fr;
+  }
+
+  .support-summary-data {
     grid-template-columns: 1fr;
   }
 
@@ -1346,6 +1461,19 @@ td small {
   .form-grid.two,
   .stepper {
     grid-template-columns: 1fr;
+  }
+
+  .support-row,
+  .support-card-header {
+    grid-template-columns: 1fr;
+  }
+
+  .support-row {
+    align-items: stretch;
+  }
+
+  .support-actions {
+    justify-items: start;
   }
 
   .public-hero {
